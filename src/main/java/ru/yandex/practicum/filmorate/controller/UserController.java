@@ -43,8 +43,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            log.warn("PUT request with wrong ID");
-            throw new NotFoundException();
+            throw new NotFoundException("PUT request with wrong ID");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());

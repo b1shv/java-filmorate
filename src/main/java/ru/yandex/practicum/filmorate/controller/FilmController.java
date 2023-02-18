@@ -33,10 +33,10 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-            validateReleaseDate(film);
-            film.setId(++idCounter);
-            films.put(film.getId(), film);
-            log.debug("POST request handled: new film added");
+        validateReleaseDate(film);
+        film.setId(++idCounter);
+        films.put(film.getId(), film);
+        log.debug("POST request handled: new film added");
         return film;
     }
 
@@ -44,8 +44,7 @@ public class FilmController {
     public Film update(@Valid @RequestBody Film film) {
         validateReleaseDate(film);
         if (!films.containsKey(film.getId())) {
-            log.warn("PUT request with wrong ID");
-            throw new NotFoundException();
+            throw new NotFoundException("PUT request with wrong ID");
         }
 
         films.put(film.getId(), film);
@@ -54,12 +53,8 @@ public class FilmController {
     }
 
     private void validateReleaseDate(Film film) {
-        if (film.getReleaseDate() == null) {
-            return;
-        }
         if (film.getReleaseDate().isBefore(FIRST_FILM_RELEASE_DATE)) {
-            log.warn("Validation failed: Incorrect release date");
-            throw new ValidationException();
+            throw new ValidationException("Validation failed: Incorrect release date");
         }
     }
 }

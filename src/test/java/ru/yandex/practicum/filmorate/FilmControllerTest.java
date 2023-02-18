@@ -43,8 +43,11 @@ class FilmControllerTest {
     @Test
     void updateShouldThrowNotFoundException_ifWrongId() {
         Film film1 = new Film();
+        film1.setReleaseDate(LocalDate.of(2000,5,12));
         Film film2 = new Film();
+        film2.setReleaseDate(LocalDate.of(2001,6,13));
         Film film3 = new Film();
+        film3.setReleaseDate(LocalDate.of(2002,7,14));
 
         filmController.create(film1);
         filmController.create(film2);
@@ -52,14 +55,17 @@ class FilmControllerTest {
 
         Film film1Updated = new Film();
         film1Updated.setName("Film 1");
+        film1Updated.setReleaseDate(LocalDate.of(2000,5,12));
         film1Updated.setId(1);
 
         Film film3Updated = new Film();
+        film3Updated.setReleaseDate(LocalDate.of(2005,12,15));
         film3Updated.setName("Film 3");
         film3Updated.setId(3);
 
         Film filmWithWrongId = new Film();
         filmWithWrongId.setId(33);
+        filmWithWrongId.setReleaseDate(LocalDate.of(1999,1,1));
 
         filmController.update(film1Updated);
         filmController.update(film3Updated);
