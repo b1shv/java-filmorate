@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
     private final UserStorage storage;
-    private int idCounter = 0;
 
     @Autowired
     public UserService(UserStorage storage) {
@@ -23,7 +21,7 @@ public class UserService {
     }
 
     public List<User> getUsers() {
-        return new ArrayList<>(storage.getUsers().values());
+        return storage.getUsers();
     }
 
     public User getUserById(int id) {
@@ -36,7 +34,6 @@ public class UserService {
             user.setName(user.getLogin());
         }
 
-        user.setId(++idCounter);
         log.debug("POST request handled: new user added");
         return storage.addUser(user);
     }
@@ -58,47 +55,45 @@ public class UserService {
         log.debug(String.format("DELETE request handled: user %d is deleted", id));
     }
 
-    public void addFriend(int id1, int id2) {
-        checkUserId(id1);
-        checkUserId(id2);
+    public void addFriend(int userId, int friendId) {
+        checkUserId(userId);
+        checkUserId(friendId);
 
-        storage.getUserById(id1).addFriend(id2);
-        storage.getUserById(id2).addFriend(id1);
-        log.debug(String.format("POST request handled: users %d and %d are now friends", id1, id2));
+        storage.getUserById(userId).addFriend(friendId);
+        storage.getUserById(friendId).addFriend(userId);
+        log.debug(String.format("POST request handled: users %d and %d are now friends", userId, friendId));
     }
 
-    public void deleteFriend(int id1, int id2) {
-        checkUserId(id1);
-        checkUserId(id2);
+    public void deleteFriend(int userid, int friendId) {
+        checkUserId(userid);
+        checkUserId(friendId);
 
-        if (!storage.getUserById(id1).getFriends().contains(id2)
-            || !storage.getUserById(id2).getFriends().contains(id1)) {
-            throw new NotFoundException(String.format("Users %d and %d are not friends", id1, id2));
+        if (!storage.getUserById(userid).getFriendIds().contains(friendId)
+                || !storage.getUserById(friendId).getFriendIds().contains(userid)) {
+            throw new NotFoundException(String.format("Users %d and %d are not friends", userid, friendId));
         }
 
-        storage.getUserById(id1).deleteFriend(id2);
-        storage.getUserById(id2).deleteFriend(id1);
+        storage.getUserById(userid).deleteFriend(friendId);
+        storage.getUserById(friendId).deleteFriend(userid);
     }
 
-    public List<User> getFriends(int id) {
-        return storage.getUserById(id).getFriends().stream()
+    public List<User> getFriends(int userId) {
+        return storage.getUserById(userId).getFriendIds().stream()
                 .map(storage::getUserById)
                 .collect(Collectors.toList());
     }
 
-    public List<User> getCommonFriends(int id1, int id2) {
-        checkUserId(id1);
-        checkUserId(id2);
+    public List<User> getCommonFriends(int userId, int otherUserId) {
+        checkUserId(userId);
+        checkUserId(otherUserId);
 
-        return storage.getUserById(id1).getFriends().stream()
-                .filter(id -> storage.getUserById(id2).getFriends().contains(id))
-                .map(storage :: getUserById)
+        return storage.getUserById(userId).getFriendIds().stream()
+                .filter(id -> storage.getUserById(otherUserId).getFriendIds().contains(id))
+                .map(storage::getUserById)
                 .collect(Collectors.toList());
     }
 
     protected void checkUserId(int id) {
-        if (!storage.getUsers().containsKey(id)) {
-            throw new NotFoundException(String.format("User %d is not found", id));
-        }
+        storage.checkUserId(id);
     }
 }

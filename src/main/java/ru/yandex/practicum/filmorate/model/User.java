@@ -15,7 +15,7 @@ import java.util.Set;
 public class User {
     private int id;
     private String name;
-    private final Set<Integer> friends = new HashSet<>();
+    private final Set<Integer> friendIds = new HashSet<>();
 
     @NotBlank(message = "field email should not be empty")
     @Email(message = "wrong email format")
@@ -30,10 +30,10 @@ public class User {
     private LocalDate birthday;
 
     public void addFriend(int id) {
-        friends.add(id);
+        friendIds.add(id);
     }
 
     public void deleteFriend(int id) {
-        friends.remove(id);
+        friendIds.remove(id);
     }
 }
